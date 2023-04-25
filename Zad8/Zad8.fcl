@@ -1,0 +1,54 @@
+FUNCTION_BLOCK Podlewanie // Block definition 
+
+VAR_INPUT				
+	wilgotnosc: REAL;
+	temparatura: REAL;
+END_VAR
+
+VAR_OUTPUT				
+	intensywnosc_podlewania : REAL;
+END_VAR
+//procenty
+FUZZIFY wilgotnosc			
+	TERM mala := (0, 1) (20, 1) (33, 0);
+	TERM srednia := (20, 0) (33, 1) (66, 0);
+	TERM duza := (33, 0) (66, 1) (100, 1);
+END_FUZZIFY
+//stopnie
+FUZZIFY temparatura			
+	TERM niska := (0, 1) (10, 1) (20,0) ;
+	TERM srednia := (10, 0) (20,1) (30,0);
+	TERM wysoka := (20, 0) (30,1) (40,1);
+END_FUZZIFY
+//ilosc razy dziennie
+DEFUZZIFY intensywnosc_podlewania			
+	TERM mala := (0,1) (1,1)(2,0);
+	TERM srednia:= (1,0) (2,1)(3,0);
+	TERM duza := (2,0)(3,1)(5,1);
+
+	METHOD : COG;		
+	DEFAULT := 0;		
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;			
+	ACT : MIN;			
+	ACCU : MAX;			
+
+	RULE 1 : IF wilgotnosc IS mala AND temparatura IS wysoka THEN intensywnosc_podlewania IS duza;
+	
+	RULE 2 : IF wilgotnosc IS duza AND temparatura IS niska THEN intensywnosc_podlewania IS mala;
+	
+	RULE 3 : IF wilgotnosc IS srednia AND temparatura IS srednia THEN intensywnosc_podlewania IS srednia;
+	
+	RULE 4 : IF wilgotnosc IS mala AND temparatura IS niska THEN intensywnosc_podlewania IS mala;
+	
+	RULE 5 : IF wilgotnosc IS srednia AND temparatura IS wysoka THEN intensywnosc_podlewania IS srednia;
+	
+	RULE 6 : IF wilgotnosc IS mala AND temparatura IS srednia THEN intensywnosc_podlewania IS srednia;
+	
+	RULE 7 : IF wilgotnosc IS duza AND temparatura IS wysoka THEN intensywnosc_podlewania IS mala;
+	
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

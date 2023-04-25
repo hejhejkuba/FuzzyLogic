@@ -1,0 +1,43 @@
+FUNCTION_BLOCK Car // Block definition 
+
+VAR_INPUT				
+	dystans: REAL;
+	predkosc: REAL;
+END_VAR
+
+VAR_OUTPUT				
+	przyspieszenie : REAL;
+END_VAR
+
+FUZZIFY dystans			
+	TERM krotki := (0, 1) (200, 1) (400, 0);
+	TERM dlugi := (200, 0) (400, 1) (1000, 1);
+END_FUZZIFY
+
+FUZZIFY predkosc			
+	TERM mala := (0, 1) (20, 1) (40,0) ;
+	TERM duza := (20, 0) (40,1) (80,1);
+END_FUZZIFY
+
+DEFUZZIFY przyspieszenie			
+	TERM zredukuj_predkosc := (-20,1) (-10,1)(0,0);
+	TERM utrzymaj_predkosc:= (-10,0) (0,1)(10,0);
+	TERM zwieksz_predkosc := (0,0) (10,1)(20,1);
+
+	METHOD : COG;		
+	DEFAULT := 0;		
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;			
+	ACT : MIN;			
+	ACCU : MAX;			
+
+	RULE 1 : IF dystans IS krotki AND predkosc IS mala THEN przyspieszenie IS utrzymaj_predkosc;
+	RULE 2 : IF dystans IS krotki AND predkosc IS duza THEN przyspieszenie IS zredukuj_predkosc;
+	RULE 3 : IF dystans IS dlugi AND predkosc IS mala THEN przyspieszenie IS zwieksz_predkosc;
+	RULE 4 : IF dystans IS dlugi AND predkosc IS duza THEN przyspieszenie IS utrzymaj_predkosc;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

@@ -1,0 +1,76 @@
+FUNCTION_BLOCK Klima // Block definition 
+
+VAR_INPUT				
+	temp_out: REAL;
+	temp_in: REAL;
+END_VAR
+
+VAR_OUTPUT				
+	klimatyzacja: REAL;
+END_VAR
+
+FUZZIFY temp_out			
+	TERM bardzo_niska := (-20, 1) (0, 1)(10,0) ; 
+	TERM niska := (0, 0) (10, 1) (20, 0);
+	TERM srednia := (10, 0) (20, 1)(30, 0);
+	TERM wysoka := (20, 0) (30, 1) (40,0);
+	TERM bardzo_wysoka := (30, 0)(40, 1) (50, 1);
+END_FUZZIFY
+
+FUZZIFY temp_in			
+	TERM bardzo_niska := (-20, 1) (0, 1)(10,0) ; 
+	TERM niska := (0, 0) (10, 1) (20, 0);
+	TERM srednia := (10, 0) (20, 1)(30, 0);
+	TERM wysoka := (20, 0) (30, 1) (40,0);
+	TERM bardzo_wysoka := (30, 0)(40, 1) (50, 1);
+END_FUZZIFY
+
+DEFUZZIFY klimatyzacja			
+	TERM bardzo_niskie_dzialanie := (0,1) (1,0);
+	TERM niskie_dzialanie := (0,0) (1,1)(20,1) (40,0);
+	TERM srednie_dzialanie := (20,0) (40,1) (60,0);
+	TERM mocne_dzialanie := (40,0) (60,1) (80,0);
+	TERM bardzo_mocne_dzialanie := (60,0) (80,1) (100,1);
+	METHOD : COG;		
+	DEFAULT := 0;		
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;			
+	ACT : MIN;			
+	ACCU : MAX;			
+
+	RULE 1 : IF temp_out IS bardzo_niska AND temp_in IS bardzo_niska THEN klimatyzacja IS bardzo_mocne_dzialanie;
+	RULE 2 : IF temp_out IS bardzo_niska AND temp_in IS niska THEN klimatyzacja IS mocne_dzialanie;
+	RULE 3 : IF temp_out IS bardzo_niska AND temp_in IS srednia THEN klimatyzacja IS srednie_dzialanie;
+	RULE 4 : IF temp_out IS bardzo_niska AND temp_in IS wysoka THEN klimatyzacja IS niskie_dzialanie;
+	RULE 5 : IF temp_out IS bardzo_niska AND temp_in IS bardzo_wysoka THEN klimatyzacja IS bardzo_niskie_dzialanie;
+	
+	RULE 6 : IF temp_out IS niska AND temp_in IS bardzo_niska THEN klimatyzacja IS bardzo_mocne_dzialanie;
+	RULE 7 : IF temp_out IS niska AND temp_in IS niska THEN klimatyzacja IS mocne_dzialanie;
+	RULE 8 : IF temp_out IS niska AND temp_in IS srednia THEN klimatyzacja IS srednie_dzialanie;
+	RULE 9 : IF temp_out IS niska AND temp_in IS wysoka THEN klimatyzacja IS niskie_dzialanie;
+	RULE 10 : IF temp_out IS srednia AND temp_in IS bardzo_wysoka THEN klimatyzacja IS bardzo_mocne_dzialanie;
+	
+	RULE 11 : IF temp_out IS srednia AND temp_in IS bardzo_niska THEN klimatyzacja IS srednie_dzialanie;
+	RULE 12 : IF temp_out IS srednia AND temp_in IS niska THEN klimatyzacja IS niskie_dzialanie;
+	RULE 13 : IF temp_out IS srednia AND temp_in IS srednia THEN klimatyzacja IS bardzo_niskie_dzialanie;
+	RULE 14 : IF temp_out IS srednia AND temp_in IS wysoka THEN klimatyzacja IS niskie_dzialanie;
+	RULE 15 : IF temp_out IS srednia AND temp_in IS bardzo_wysoka THEN klimatyzacja IS bardzo_mocne_dzialanie;
+	
+	RULE 16 : IF temp_out IS wysoka AND temp_in IS bardzo_wysoka THEN klimatyzacja IS bardzo_mocne_dzialanie;
+	RULE 17 : IF temp_out IS wysoka AND temp_in IS bardzo_niska THEN klimatyzacja IS mocne_dzialanie;
+	RULE 18 : IF temp_out IS wysoka AND temp_in IS niska THEN klimatyzacja IS srednie_dzialanie;
+	RULE 19 : IF temp_out IS wysoka AND temp_in IS srednia THEN klimatyzacja IS niskie_dzialanie;
+	RULE 20 : IF temp_out IS wysoka AND temp_in IS wysoka THEN klimatyzacja IS bardzo_niskie_dzialanie;
+	
+	RULE 21 : IF temp_out IS bardzo_wysoka AND temp_in IS bardzo_niska THEN klimatyzacja IS bardzo_mocne_dzialanie;
+	RULE 22 : IF temp_out IS bardzo_wysoka AND temp_in IS niska THEN klimatyzacja IS mocne_dzialanie;
+	RULE 23 : IF temp_out IS bardzo_wysoka AND temp_in IS srednia THEN klimatyzacja IS srednie_dzialanie;
+	RULE 24 : IF temp_out IS bardzo_wysoka AND temp_in IS wysoka THEN klimatyzacja IS niskie_dzialanie;
+	RULE 25 : IF temp_out IS bardzo_wysoka AND temp_in IS bardzo_wysoka THEN klimatyzacja IS bardzo_niskie_dzialanie;
+	
+	
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
